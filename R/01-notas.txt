@@ -1,0 +1,22 @@
+Bioconductor
+Link: https://lcolladotor.github.io/rnaseq_LCG-UNAM_2021/introducci%C3%B3n-a-bioconductor.html
+
+Objetos especificos como:
+SummarizedExperiment
+
+Tipos de paquete:
+  -Software
+  -Anotacion
+  -Experiment Data: Compartir datos
+  -Workflows
+
+DOS ramas de Bioconductor:
+
+Release
+  Puede no contar con cosas nuevas pero ta ha sido probado
+
+Devel
+  En desarrollo
+
+
+
