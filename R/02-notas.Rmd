@@ -124,3 +124,44 @@ iSEE::iSEE(sce_layer)
 
 
 
+# Datos de RNA-Seq
+
+```{r}
+library("recount3")
+
+```
+
+```{r}
+## Revisemos todos los proyectos con datos de humano en recount3
+human_projects <- available_projects()
+## SRP009615 de ejemplo
+proj_info <- subset(
+    human_projects,
+    project == "SRP009615" & project_type == "data_sources"
+)
+## Crea un objetio de tipo RangedSummarizedExperiment (RSE)
+## con la información a nivel de genes
+rse_gene_SRP009615 <- create_rse(proj_info)
+```
+## Explorando el objeto
+```{r}
+rse_gene_SRP009615
+```
+- raw_counts:No es el numero de lecturas que sobrelapan en cada base de la lectura.
+Es la suma de los sobrelapes a lo largo de todas las bases (los exones desunidos)
+
+
+```{r}
+assay(rse_gene_SRP009615, "counts") <- compute_read_counts(rse_gene_SRP009615)
+```
+
+### Información del experimento
+```{r}
+rse_gene_SRP009615 <- expand_sra_attributes(rse_gene_SRP009615)
+colData(rse_gene_SRP009615)[
+    ,
+    grepl("^sra_attribute", colnames(colData(rse_gene_SRP009615)))
+]
+```
+
+
