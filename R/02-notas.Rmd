@@ -87,6 +87,30 @@ rse$Treatment
 ```
 
 
+##Visualizacion 
+
+library("iSEE")
+iSEE::iSEE(rse)
+
+Esto abre una oagina interactiva que nos permite ver la información contenida en un objeto SummarizedExperiment
+
+
+
+
+
+# spatialLIBD
+```{r}
+## Descarguemos unos datos de spatialLIBD
+sce_layer <- spatialLIBD::fetch_data("sce_layer")
+
+sce_layer
+
+pryr::object_size(sce_layer)
+
+iSEE::iSEE(sce_layer)
+
+```
+
 
 
 
