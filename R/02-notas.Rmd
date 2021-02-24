@@ -1,0 +1,92 @@
+---
+title: "02-notas"
+output: html_document
+---
+
+##Objetos
+
+- SumarizedExpermient
+- GenomicRanges
+
+
+```{r}
+
+library("SummarizedExperiment")
+
+nrows <- 200
+ncols <- 6
+
+## Números al azar
+set.seed(20210223)
+counts <- matrix(runif(nrows * ncols, 1, 1e4), nrows)
+## Información de nuestros genes
+rowRanges <- GRanges(
+    rep(c("chr1", "chr2"), c(50, 150)),
+    IRanges(floor(runif(200, 1e5, 1e6)), width = 100),
+    strand = sample(c("+", "-"), 200, TRUE),
+    feature_id = sprintf("ID%03d", 1:200)
+)
+names(rowRanges) <- paste0("gene_", seq_len(length(rowRanges)))
+## Información de nuestras muestras
+colData <- DataFrame(
+    Treatment = rep(c("ChIP", "Input"), 3),
+    row.names = LETTERS[1:6]
+)
+## Juntamos ahora toda la información en un solo objeto de R
+rse <- SummarizedExperiment(
+    assays = SimpleList(counts = counts),
+    rowRanges = rowRanges,
+    colData = colData
+)
+
+#Ver un poco del objeto
+print("Dimensiones")
+dim(rse)
+print("Head")
+head(assay(rse))
+print("nrowRanges")
+rowRanges(rse)
+
+
+```
+
+### Ver los "unique" levels (cromosomas)
+seqlevels(rse)
+
+### Tabla comprimida por repetición de cada level (chromosoma)
+seqnames(rowRanges(rse))
+
+### Se tienen 200 genes y 6 muestras
+
+###Cromosomas que estan en el array
+```{r}
+
+seqlevels(rse)
+
+```
+
+## Ejercicio
+
+### Comando 1
+rse[1:2, ]
+
+Esta comando accede a primeros dos genes, haciendo un subconjutno en todas las tablas
+
+
+### Comando 2
+rse[, c("A", "D", "F")]
+
+Este comando accede a las muestras A,D y F, mediante los nombres de las muestras
+
+
+###Extra
+Valores de Treatment definido en la tabla de colData
+rse$Treatment:
+```{r}
+rse$Treatment
+```
+
+
+
+
+
