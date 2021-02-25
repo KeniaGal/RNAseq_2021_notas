@@ -164,5 +164,145 @@ rse_gene_SRP045638 <- rse_gene_SRP045638[gene_means > 0.1, ]
 ## Dimensiones finales
 dim(rse_gene_SRP045638)
 
+# Porcentaje de genes que retuvimos
+round(nrow(rse_gene_SRP045638) / nrow(rse_gene_SRP045638_unfiltered) * 100, 2)
+
 ```
+
+
+# Normalizacion de datos
+```{r}
+library("edgeR") # BiocManager::install("edgeR", update = FALSE)
+dge <- DGEList(
+    counts = assay(rse_gene_SRP045638, "counts"),
+    genes = rowData(rse_gene_SRP045638)
+)
+dge <- calcNormFactors(dge) #Factores de normalización
+
+```
+
+#Expresión diferencial
+ Explorar los datos 
+```{r}
+library("ggplot2")
+ggplot(as.data.frame(colData(rse_gene_SRP045638)), aes(y = assigned_gene_prop, x = prenatal)) +
+    geom_boxplot() +
+    theme_bw(base_size = 20) +
+    ylab("Assigned Gene Prop") +
+    xlab("Age Group")
+```
+ 
+
+Modelo 
+```{r}
+mod <- model.matrix(~ prenatal + sra_attribute.RIN + sra_attribute.sex + assigned_gene_prop,
+    data = colData(rse_gene_SRP045638)
+)
+colnames(mod)
+```
+
+Modelos de regresion lineal con limma, mejores estimados de la desviacion estandar
+```{r}
+library("limma")
+vGene <- voom(dge, mod, plot = TRUE)
+```
+
+
+```{r}
+eb_results <- eBayes(lmFit(vGene))
+
+de_results <- topTable(
+    eb_results,
+    coef = 2, #prenatalprenatal, el coeficiente de interes
+    number = nrow(rse_gene_SRP045638),
+    sort.by = "none"
+)
+dim(de_results)
+```
+
+```{r}
+head(de_results)
+```
+
+```{r}
+## Genes diferencialmente expresados entre pre y post natal con FDR < 5%
+table(de_results$adj.P.Val < 0.05)
+```
+
+```{r}
+## Visualicemos los resultados estadísticos
+plotMA(eb_results, coef = 2)
+```
+
+Volcanoplot
+Los valores más lejanos al eje x tienen un menor valor p
+```{r}
+volcanoplot(eb_results, coef = 2, highlight = 3, names = de_results$gene_name)
+```
+
+de_results[de_results$gene_name %in% c("ZSCAN2", "VASH2", "KIAA0922"), ]
+
+# DE
+```{r}
+## Extraer valores de los genes de interés
+exprs_heatmap <- vGene$E[rank(de_results$adj.P.Val) <= 50, ]
+
+## Creemos una tabla con información de las muestras
+## y con nombres de columnas más amigables
+df <- as.data.frame(colData(rse_gene_SRP045638)[, c("prenatal", "sra_attribute.RIN", "sra_attribute.sex")])
+colnames(df) <- c("AgeGroup", "RIN", "Sex")
+
+## Hagamos un heatmap
+library("pheatmap")
+pheatmap(
+    exprs_heatmap,
+    cluster_rows = TRUE,
+    cluster_cols = TRUE,
+    show_rownames = FALSE,
+    show_colnames = FALSE,
+    annotation_col = df
+)
+
+```
+
+
+```{r}
+## Para colores
+library("RColorBrewer")
+
+## Conviertiendo los grupos de edad a colores
+col.group <- df$AgeGroup
+levels(col.group) <- brewer.pal(nlevels(col.group), "Set1")
+```
+```{r}
+col.group <- as.character(col.group)
+
+## MDS por grupos de edad
+plotMDS(vGene$E, labels = df$AgeGroup, col = col.group)
+```
+
+```{r}
+## Conviertiendo los valores de Sex a colores
+col.sex <- df$Sex
+levels(col.sex) <- brewer.pal(nlevels(col.sex), "Dark2")
+col.sex <- as.character(col.sex)
+plotMDS(vGene$E, labels = df$Sex, col = col.sex)
+```
+
+# Ejercicio 
+```{r}
+#Cambio del nombre de rownames
+rownames(exprs_heatmap) <- rowRanges(rse_gene_SRP045638)$gene_name[match(rownames(exprs_heatmap), rowRanges(rse_gene_SRP045638)$gene_id)]
+#Visualización
+pheatmap(
+    exprs_heatmap,
+    cluster_rows = TRUE,
+    cluster_cols = TRUE,
+    show_rownames = TRUE,
+    show_colnames = FALSE,
+    annotation_col = df
+)
+```
+
+
 
