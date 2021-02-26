@@ -54,14 +54,14 @@ vd <- ExploreModelMatrix::VisualizeDesign(
 cowplot::plot_grid(plotlist = vd$plotlist)
 ```
 
-```{r}
+
 ## Usaremos shiny otra ves
 app <- ExploreModelMatrix(
     sampleData = sampleData,
     designFormula = ~ genotype + treatment
 )
 if (interactive()) shiny::runApp(app)
-```
+
 
 
 
