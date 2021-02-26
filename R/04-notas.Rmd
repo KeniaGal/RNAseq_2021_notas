@@ -1,0 +1,69 @@
+---
+title: "04-notas"
+output: html_document
+---
+
+- Edge R nos permite eliminar los sesgos relacionados a la composicion de nuestros datos.
+
+- En topTable() el argumento sort.by nos permite ordenar o conservar el orden deseado en los datos, por ejemplo para evitar el uso de match debido a la perdida del orden original
+
+
+# Revision
+```{r}
+speaqeasy_data <- file.path(tempdir(), "rse_speaqeasy.RData")
+download.file("https://github.com/LieberInstitute/SPEAQeasy-example/blob/master/rse_speaqeasy.RData?raw=true", speaqeasy_data, mode = "wb")
+library("SummarizedExperiment")
+load(speaqeasy_data, verbose = TRUE)
+```
+```{r}
+rse_gene
+
+```
+
+Se tienen 60609 genes en 40 muestras
+Con 67 columnas de información (colData)
+
+
+```{r}
+rse_gene$PrimaryDx
+m<-'Bipolar'
+Bipo<-(rse_gene$PrimaryDx==m)
+which(Bipo,arr.ind = TRUE)
+control<-(rse_gene$PrimaryDx!=m)
+which(control,arr.ind = TRUE)
+
+```
+```{r}
+summary(rse_gene$totalAssignedGene[Bipo])
+
+summary(rse_gene$totalAssignedGene[control])
+```
+
+
+```{r}
+rse_gene$Bipo <- factor(ifelse(rse_gene$PrimaryDx == m, "Bipo", "Control"))
+
+```
+```{r}
+table(rse_gene$Bipo)
+```
+
+
+```{r}
+library("ggplot2")
+ggplot(as.data.frame(colData(rse_gene)), aes(y =totalAssignedGene , x = Bipo)) +
+    geom_boxplot() +
+    theme_bw(base_size = 20) +
+    ylab("") +
+    xlab("Grupo")
+```
+
+```{r}
+library("ggplot2")
+ggplot(as.data.frame(colData(rse_gene)), aes(y =mitoRate , x = Bipo)) +
+    geom_boxplot() +
+    theme_bw(base_size = 20) +
+    ylab("") +
+    xlab("Grupo")
+```
+
