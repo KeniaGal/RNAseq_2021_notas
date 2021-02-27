@@ -25,27 +25,10 @@ Con 67 columnas de información (colData)
 
 
 ```{r}
-rse_gene$PrimaryDx
-m<-'Bipolar'
-Bipo<-(rse_gene$PrimaryDx==m)
-which(Bipo,arr.ind = TRUE)
-control<-(rse_gene$PrimaryDx!=m)
-which(control,arr.ind = TRUE)
-
-```
-```{r}
-summary(rse_gene$totalAssignedGene[Bipo])
-
-summary(rse_gene$totalAssignedGene[control])
-```
-
-
-```{r}
 rse_gene$Bipo <- factor(ifelse(rse_gene$PrimaryDx == m, "Bipo", "Control"))
-
-```
-```{r}
 table(rse_gene$Bipo)
+rse_gene$PrimaryDx<-droplevels(rse_gene$PrimaryDx)
+
 ```
 
 
@@ -66,4 +49,44 @@ ggplot(as.data.frame(colData(rse_gene)), aes(y =mitoRate , x = Bipo)) +
     ylab("") +
     xlab("Grupo")
 ```
+En los grupos hay diferencias en mitoRate
+
+
+```{r}
+library("iSEE")
+iSEE::iSEE()
+```
+
+#Modelo
+
+```{r}
+sampleData <- data.frame(sexo=rse_gene$Sex, edadMuerte=rse_gene$AgeDeath,grupo=rse_gene$PrimaryDx)
+ 
+# vd <- ExploreModelMatrix::VisualizeDesign(
+#    sampleData = sampleData,
+#    designFormula = ~ grupo + sexo + edadMuerte,
+#    textSizeFitted = 4
+# )
+# cowplot::plot_grid(plotlist = vd$plotlist)
+```
+
+Visualización
+```{r}
+
+
+# if (interactive()) {
+#     ## Tenemos que eliminar columnas que tienen NAs.
+#     ExploreModelMatrix::ExploreModelMatrix(
+#         colData(rse_gene)[, c(
+#             "PrimaryDx", "totalAssignedGene", "rRNA_rate", "BrainRegion", "Sex",
+#             "AgeDeath"
+#         )],
+#         ~ PrimaryDx + Sex + AgeDeath
+#     )
+# }
+```
+
+
+
+
 
